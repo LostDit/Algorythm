@@ -1,3 +1,4 @@
+#define NOMINMAX
 #pragma once
 #include <iostream>
 #include <vector>
@@ -7,15 +8,15 @@
 #include <iomanip>
 #include <algorithm>
 #include <windows.h>
+#include <climits>
+#include <limits>
 
-// ------------------------- СТРУКТУРА ДЛЯ СТАТИСТИКИ -------------------------
 struct Stats {
-    size_t comp_elem = 0;   // сравнения с элементом массива
-    size_t comp_other = 0;  // сравнения не с элементом (индексы, границы)
-    size_t swaps = 0;       // перестановки (обмены)
+    size_t comp_elem = 0;
+    size_t comp_other = 0;
+    size_t swaps = 0;
 };
 
-// ------------------------- ГЕНЕРАЦИЯ МАССИВОВ -------------------------
 std::vector<int> generateSorted(int n) {
     std::vector<int> v(n);
     for (int i = 0; i < n; ++i) v[i] = i;
@@ -35,9 +36,8 @@ std::vector<int> generateRandom(int n) {
     return v;
 }
 
-// ------------------------- 1. ПРОСТОЙ ВЫБОР -------------------------
 void selectionSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     for (int i = 0; i < n - 1; ++i) {
         int min_idx = i;
         for (int j = i + 1; j < n; ++j) {
@@ -51,9 +51,8 @@ void selectionSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 2. ПРОСТОЙ ОБМЕН (пузырёк) -------------------------
 void bubbleSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     for (int i = 0; i < n - 1; ++i) {
         for (int j = 0; j < n - i - 1; ++j) {
             s.comp_elem++;
@@ -65,9 +64,8 @@ void bubbleSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 3. УЛУЧШЕННЫЙ ПУЗЫРЁК (с флагом) -------------------------
 void improvedBubbleSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     bool swapped;
     for (int i = 0; i < n - 1; ++i) {
         swapped = false;
@@ -83,9 +81,8 @@ void improvedBubbleSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 4. ШЕЙКЕРНАЯ СОРТИРОВКА -------------------------
 void shakerSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     bool swapped = true;
     int start = 0, end = n - 1;
     while (swapped) {
@@ -112,9 +109,8 @@ void shakerSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 5. ПРОСТЫЕ ВСТАВКИ -------------------------
 void insertionSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     for (int i = 1; i < n; ++i) {
         int key = a[i];
         int j = i - 1;
@@ -132,9 +128,8 @@ void insertionSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 6. ВСТАВКИ С БАРЬЕРОМ -------------------------
 void barrierInsertionSort(std::vector<int>& a, Stats& s) {
-    int n = a.size();
+    int n = static_cast<int>(a.size());
     int min_idx = 0;
     for (int i = 1; i < n; ++i) {
         s.comp_elem++;
@@ -161,7 +156,6 @@ void barrierInsertionSort(std::vector<int>& a, Stats& s) {
     }
 }
 
-// ------------------------- 7. СОРТИРОВКА СЛИЯНИЕМ -------------------------
 void merge(std::vector<int>& a, int left, int mid, int right, Stats& s) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -191,10 +185,9 @@ void mergeSort(std::vector<int>& a, int left, int right, Stats& s) {
     }
 }
 void mergeSortWrapper(std::vector<int>& a, Stats& s) {
-    mergeSort(a, 0, a.size() - 1, s);
+    mergeSort(a, 0, static_cast<int>(a.size()) - 1, s);
 }
 
-// ------------------------- 8. БЫСТРАЯ СОРТИРОВКА ХОАРА -------------------------
 int partition(std::vector<int>& a, int low, int high, Stats& s) {
     int pivot = a[high];
     int i = low - 1;
@@ -218,13 +211,11 @@ void quickSort(std::vector<int>& a, int low, int high, Stats& s) {
     }
 }
 void quickSortWrapper(std::vector<int>& a, Stats& s) {
-    quickSort(a, 0, a.size() - 1, s);
+    quickSort(a, 0, static_cast<int>(a.size()) - 1, s);
 }
 
-// ------------------------- ТАБЛИЦА СТАТИСТИКИ СОРТИРОВОК -------------------------
 void printSortingTable() {
     const int N = 100000;
-    const int REPEATS = 1;
     enum Type { SORTED, REVERSED, RANDOM };
     std::string typeNames[] = { "По неубыванию", "По невозрастанию", "Случайно" };
 
@@ -269,7 +260,6 @@ void printSortingTable() {
     }
 }
 
-// ------------------------- ЗАМЕР ВРЕМЕНИ ДЛЯ РАЗНЫХ ДЛИН -------------------------
 double measureTime(void (*sortFunc)(std::vector<int>&, Stats&), std::vector<int> arr, int repeats = 10) {
     double total = 0.0;
     for (int i = 0; i < repeats; ++i) {
@@ -310,7 +300,6 @@ void printTimeTable() {
     }
 }
 
-// ------------------------- ВАРИАНТ 7: МАКСИМАЛЬНОЕ ПРОИЗВЕДЕНИЕ ДВУХ ЭЛЕМЕНТОВ -------------------------
 void taskMaxProduct() {
     std::ifstream in("maxproduct.txt");
     if (!in) {
@@ -325,9 +314,11 @@ void taskMaxProduct() {
         std::cout << "В массиве меньше двух элементов, произведение не определить.\n";
         return;
     }
-    // Находим два максимальных положительных и два минимальных отрицательных
-    int max1 = INT_MIN, max2 = INT_MIN;
-    int min1 = INT_MAX, min2 = INT_MAX;
+    int max1 = std::numeric_limits<int>::min();
+    int max2 = std::numeric_limits<int>::min();
+    int min1 = std::numeric_limits<int>::max();
+    int min2 = std::numeric_limits<int>::max();
+
     for (int num : arr) {
         if (num > max1) { max2 = max1; max1 = num; }
         else if (num > max2) max2 = num;
@@ -340,7 +331,6 @@ void taskMaxProduct() {
     std::cout << "Максимальное произведение двух элементов: " << ans << "\n";
 }
 
-//Запуск 3 лабы (логика)
 void runLab3() {
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
